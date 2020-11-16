@@ -1,0 +1,42 @@
+// Import Bulma's core
+@import "~bulma/sass/utilities/_all";
+@import 'palette';
+
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400');
+@import url('https://fonts.googleapis.com/css?family=Muli');
+
+// Set your colors
+$primary: #e4001a;
+$primary-invert: findColorInvert($primary);
+$twitter: #4099FF;
+$twitter-invert: findColorInvert($twitter);
+$dark-blue: #555F80;
+$dark-blue-invert: findColorInvert($dark-blue);
+
+// Setup $colors to use as bulma classes (e.g. 'is-twitter')
+$colors: (
+    "white": ($white, $black),
+    "black": ($black, $white),
+    "c1": ($color1, findColorInvert($color1)),
+    "c2": ($color2, findColorInvert($color2)),
+    "c3": ($color3, findColorInvert($color3)),
+    "c4": ($color4, findColorInvert($color4)),
+    "c5": ($color5, findColorInvert($color5)),
+    "light": ($light, $light-invert),
+    "dark": ($dark, $dark-invert),
+    "primary": ($primary, $primary-invert),
+    "info": ($info, $info-invert),
+    "success": ($success, $success-invert),
+    "warning": ($warning, $warning-invert),
+    "danger": ($danger, $danger-invert),
+    "twitter": ($twitter, $twitter-invert),
+    "dark-blue": ($dark-blue, $dark-blue-invert)
+);
+// Links
+$link: $primary;
+$link-invert: $primary-invert;
+$link-focus-border: $primary;
+
+// Import Bulma and Buefy styles
+@import "~bulma";
+@import "~buefy/src/scss/buefy";
