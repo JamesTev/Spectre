@@ -1,92 +1,149 @@
 <template>
   <div>
-    <div
-      :class="status == 0 ? 'has-background-c3' : 'has-background-primary'"
-      style="height: 3px"
-    ></div>
-    <div class="container">
-      <form v-if="showLogin">
-        <div class="columns" style="padding-top: 10px">
-          <div class="column is-4 is-offset-8">
-            <form>
-              <b-field
-                class="has-text-left"
-                label="Username"
-                :type="{ 'is-danger': loginError }"
-              >
-                <b-input
-                  minlength="1"
-                  :disabled="authenticating"
-                  v-model="username"
-                ></b-input>
-              </b-field>
-
-              <b-field
-                label="Password"
-                class="has-text-left"
-                :type="{ 'is-danger': authenticationErrorCode == 401 }"
-                :message="{
-                  'Incorrect login credentials': authenticationErrorCode == 401,
-                }"
-              >
-                <b-input
-                  :disabled="authenticating"
-                  type="password"
-                  v-model="password"
-                  password-reveal
-                >
-                </b-input>
-              </b-field>
-
-              <b-field grouped group-multiline>
-                <b-button
-                  :loading="authenticating"
-                  :disabled="authenticating"
-                  class="button field is-primary"
-                  @click="handleLogin()"
-                >
-                  <span>submit</span>
-                </b-button>
-                <b-button
-                  class="button field is-light"
-                  @click="showLogin = false"
-                >
-                  <span>hide</span>
-                </b-button>
-              </b-field>
-            </form>
-          </div>
-        </div>
-      </form>
+    <div class="container" style="padding-bottom: 50px">
       <section class="hero is-fullheight has-text-left">
-        <div class="hero-body">
+        <div>
           <div class="container">
             <!-- <img src="/assets/invictus-logo.svg" width="256px"> -->
-            <h1 class="title" style="margin-bottom:5px">Spectre</h1>
+            <h1
+              class="title is-2"
+              style="padding-top: 40px; margin-bottom: 5px"
+            >
+              Spectre
+            </h1>
             <h1 class="heading">Spectrum Analyser</h1>
-            <h2 class="subtitle" style="padding-top: 20px">Spectrum for sample x</h2>
-            <!-- <h2 class="subtitle">Access portal</h2>
-            <div class="field has-addons">
-              <p class="control">
-                <input
-                  v-model="pw"
-                  class="input is-c3"
-                  type="password"
-                  placeholder="password"
-                />
-              </p>
-              <p class="control">
-                <b-button class="button field is-c3" @click="trigger"
-                  >submit</b-button
-                >
-              </p>
-            </div> -->
 
-            <Plotly
-              :data="chartData.data"
-              :layout="chartData.layout"
-              style="margin-top: 0px; padding: 0px"
-            ></Plotly>
+            <div
+              id="infoCapture"
+              class="is-left"
+              style="padding: 20px 0px 20px 0px"
+            >
+              <div class="columns" style="padding-top: 30px">
+                <div class="column is-6">
+                  <p class="title is-5" style="padding-top: 10px">
+                    Owner information
+                  </p>
+                  <p class="subtitle is-6" style="margin-bottom: 20px">
+                    Information to record the device owner
+                  </p>
+                  <b-field label="Device Owner" label-position="on-border">
+                    <b-select
+                      placeholder="Select device owner"
+                      v-model="selectedDevice"
+                    >
+                      <option v-for="(d, idx) in devices" :value="d" :key="idx">
+                        {{ d.owner }}
+                      </option>
+                    </b-select>
+                  </b-field>
+                </div>
+                <div class="column">
+                  <p class="title is-5" style="padding-top: 10px">
+                    On-device Parameters
+                  </p>
+                  <p class="subtitle is-6" style="margin-bottom: 20px">
+                    Pertinent parameters from the onboard spectrometer
+                    controller
+                  </p>
+                  <b-field grouped>
+                    <div
+                      v-for="[param, val] of Object.entries(
+                        config.deviceParamDefaults
+                      )"
+                      :key="param"
+                    >
+                      <b-field
+                        :label="param"
+                        label-position="on-border"
+                        expanded
+                      >
+                        <b-input :value="val" type="number"></b-input>
+                      </b-field>
+                    </div>
+                  </b-field>
+                </div>
+              </div>
+            </div>
+
+            <b-tabs v-model="viewTab" style="padding-top:0px" position="is-right" type="is-toggle" v-if="!dataLoading && requiredInfoCaptured">
+              <b-tab-item label="Live view">
+                <div>
+              <div>
+                <h2 class="title is-4" style="padding-top: 20px">
+                  Sample Spectrum
+                </h2>
+                <Plotly
+                  :data="chartData.data"
+                  :layout="chartData.layout"
+                  style="margin-top: 0px; padding: 0px"
+                ></Plotly>
+              </div>
+              <div class="columns" style="padding-top: 30px">
+                <div class="column is-3">
+                  <b-field label="Number of readings per set">
+                    <b-slider
+                      :min="1"
+                      :max="10"
+                      ticks
+                      class="is-primary"
+                      v-model="readingSetLen"
+                    ></b-slider>
+                  </b-field>
+                </div>
+                <div class="column is-3">
+                  <b-field label="Sample period (sec)">
+                    <b-slider
+                      :min="0.1"
+                      :max="4.0"
+                      :step="0.1"
+                      class="is-primary"
+                      v-model="readingPeriodSec"
+                    ></b-slider>
+                  </b-field>
+                </div>
+                <div class="column has-text-right">
+                  <b-button
+                    class="button is-primary has-text-right"
+                    :loading="isRecording"
+                    @click="recordReadingSet"
+                    >Record set
+                  </b-button>
+        
+                </div>
+              </div>
+
+              <b-progress
+                size="is-medium"
+                v-if="isRecording"
+                type="is-primary"
+                :value="recProgress"
+                show-value
+              ></b-progress>
+            </div>
+            <div v-if="dataLoading" style="padding-top: 40px">
+              <p class="subtitle is-5">awaiting data...</p>
+            </div>
+
+              </b-tab-item>
+              <b-tab-item label="Sample view" :disabled="readingSet.length == 0">
+                <div v-if="readingSet && readingSet.length > 0">
+
+                   <h2 class="title is-5" style="padding-top: 20px">
+                  Sample Spectrum
+                </h2>
+                <Plotly
+                  :data="readingSetChartData.data"
+                  :layout="readingSetChartData.layout"
+                  style="margin-top: 0px; padding: 0px"
+                ></Plotly>
+                </div>
+               
+
+              </b-tab-item>
+
+            </b-tabs>
+
+            
           </div>
         </div>
       </section>
@@ -98,59 +155,102 @@
 // @ is an alias to /src
 import { mapGetters, mapActions } from "vuex";
 import { Plotly } from "vue-plotly";
+import config from "@/config/config.json";
 
 export default {
   name: "home",
   components: {
-    Plotly
+    Plotly,
   },
   data() {
     return {
-      showLogin: false,
-      username: "",
-      password: "",
-      loginError: false,
-      pw: "",
-      status: 0, //closed
+      config,
+      sensorData: [],
+      readingSet: [],
+      devices: [],
+      viewTab: 0,
+      selectedDevice: null,
+      readingSetLen: 5,
+      readingPeriodSec: 0.5,
+      isRecording: false,
+      recProgress: 0.0,
     };
   },
   beforeMount() {
-    // this.$connect(); //connect ws
-    // this.$options.sockets.onmessage = (msg) => {
-    //   this.handleMsg(msg.data);
-    // };
-    // this.$options.sockets.onopen = (data) => {};
+    this.$connect(); //connect ws
+    this.$options.sockets.onmessage = (msg) => {
+      this.handleMsg(msg.data);
+    };
+    this.$options.sockets.onopen = (data) => {};
   },
-  mounted() {},
+  mounted() {
+    // populate params with config defaults
+    this.readingSetLen = this.config.samplingDefaults.readingsPerSet;
+    this.readingPeriodSec = this.config.samplingDefaults.readingPeriodSec;
+    this.devices = this.config.devices;
+  },
   computed: {
+    dataLoading() {
+      return !this.sensorData || this.sensorData.length == 0;
+    },
+    requiredInfoCaptured() {
+      return this.selectedDevice;
+    },
     chartData(data, title = "") {
       var x = [];
-      var y = []
-      var colors = []
-      for (var i = 0; i < 128; i ++) {
-        y[i] = Math.random();
-        x[i] = 400+i*2.5
-        colors[i] = "hsl("+i*2+", 100%, 80%)"
+      var y = this.sensorData.map((yi) => (yi * 100) / 255);
+      var colors = [];
+      for (var i = 0; i < this.sensorData.length; i++) {
+        x[i] = 400 + i * 2.5;
+        colors[i] = "hsl(" + 250 * (1 - i / 128) + ", 100%, 80%)";
       }
       let chartData = [
         {
-          x: x,
+          x: x.reverse(),
           y: y,
           type: "bar",
+          autoscale: false,
           name: "long zig",
           marker: {
-            color: colors,
-            line: { color: "rgba(85, 95, 128, 1)", width: 0.5 }
-          }
-        }
+            color: colors.reverse(),
+            line: { color: "rgba(85, 95, 128, 1)", width: 0.5 },
+          },
+        },
       ];
       let layout = {
         title: title,
         bargap: 0.02,
         margin: { t: 20, r: 0 },
         font: { size: 12, family: "Avenir" },
-        xaxis: { title: "Wavelength (μm)" },
-        yaxis: { title: "Intensity" }
+        xaxis: { title: "Wavelength (nm)" },
+        yaxis: { title: "Intensity %", range: [0, 100], autoscale: false },
+      };
+
+      return { data: chartData, layout: layout };
+    },
+    readingSetChartData(data, title = "") {
+      let rSet = this.readingSet;
+      let x = rSet[0].map((el, i) => 400 + 400 * (i / rSet[0].length)); // create wavelength range
+
+      let chartData = rSet.map((r, i) => {
+        return {
+          y: r,
+          x: x,
+          type: "line",
+          name: "sample " + (i + 1),
+          marker: {
+            line: { color: "rgba(85, 95, 128, 1)", width: 0.5 },
+          },
+        };
+      });
+
+      let layout = {
+        title: title,
+        bargap: 0.02,
+        margin: { t: 20, r: 0 },
+        font: { size: 12, family: "Avenir" },
+        xaxis: { title: "Wavelength (nm)" },
+        yaxis: { title: "Intensity %", range: [0, 100], autoscale: false },
       };
 
       return { data: chartData, layout: layout };
@@ -164,6 +264,19 @@ export default {
   },
   methods: {
     ...mapActions("auth", ["login"]),
+    async recordReadingSet() {
+      this.recProgress = 0;
+      this.isRecording = true;
+      this.readingSet = [];
+      for (let i = 0; i < this.readingSetLen; i++) {
+        this.readingSet.push(this.sensorData.map((yi) => (yi * 100) / 255));
+        await sleep(this.readingPeriodSec * 1000);
+        this.recProgress = ((i + 1) * 100) / this.readingSetLen;
+      }
+      console.log(this.readingSet);
+      this.isRecording = false;
+      this.viewTab = 1
+    },
     trigger() {
       if (this.pw == "zouzou") {
         this.$socket.send("operate gate");
@@ -183,32 +296,30 @@ export default {
       }
     },
     handleMsg(data) {
-      if (data.includes("P0")) {
-        this.status = data.endsWith("0") ? 0 : 1;
-      }
-    },
-    handleLogin() {
-      // Perform a simple validation that email and password have been typed in
-      if (this.username != "" && this.password != "") {
-        this.login({ username: this.username, password: this.password }).then(
-          (loggedIn) => {
-            if (!loggedIn) {
-              if (this.authenticationErrorCode != 401) {
-                this.$buefy.toast.open({
-                  duration: 2000,
-                  message: "Unable to reach the login server :(",
-                  position: "is-top",
-                  type: "is-danger",
-                });
-              }
-            }
+      // let buffer = new Uint8Array(data).buffer;
+      // let dataView = new DataView(buffer);
+      // console.log(dataView)
+
+      if (data instanceof Blob) {
+        let fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(data);
+        let _this = this;
+        fileReader.onload = function (event) {
+          let dataView = new DataView(fileReader.result);
+          let out = new Array(dataView.byteLength);
+          for (let i = 0; i < dataView.byteLength; i++) {
+            out[i] = dataView.getUint8(i);
           }
-        );
-        this.password = "";
+          _this.sensorData = out;
+        };
       }
     },
   },
 };
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 </script>
 
 <style scoped>

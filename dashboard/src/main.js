@@ -22,7 +22,8 @@ Vue.config.productionTip = false;
 Vue.use(Buefy, {defaultIconComponent: 'fa-icon',
 defaultIconPack: 'fas',});
 
-Vue.use(VueNativeSock, 'ws://jamestev.myddns.me:801', {reconnection: true, connectManually:true})
+Vue.use(VueNativeSock, 'ws://jamestev.myddns.me:802', {reconnection: true, connectManually:true})
+
 Vue.use(require('vue-cookies'))
 Vue.$cookies.config('1d')
 
