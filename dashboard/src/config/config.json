@@ -25,7 +25,7 @@
         "exposure": 2000.0 
     },
     "samplingDefaults": {
-        "readingsPerSet": 5,
+        "readingsPerSet": 3,
         "readingPeriodSec": 0.4
     }
 }

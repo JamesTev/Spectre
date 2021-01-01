@@ -3,6 +3,7 @@ import Buefy from 'buefy';
 import App from './App.vue';
 import router from './router';
 import store from './store';
+import "buefy/dist/buefy.css";
 
 import '../custom-styles.scss';
 
@@ -10,17 +11,42 @@ import {ApiService} from "./services/api.service"
 import {TokenService} from "./services/storage.service"
 import VueNativeSock from 'vue-native-websocket'
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueFeatherIconPack from "./components/VueFeatherIconPack.vue";
 
-library.add(fas)
-Vue.component('fa-icon', FontAwesomeIcon)
+Vue.component("vue-feather-icon-pack", VueFeatherIconPack);
 
 Vue.config.productionTip = false;
 
-Vue.use(Buefy, {defaultIconComponent: 'fa-icon',
-defaultIconPack: 'fas',});
+Vue.use(Buefy, {
+  defaultIconComponent: "vue-feather-icon-pack",
+  defaultIconPack: 'ft',
+  customIconPacks: {
+    ft: {
+      sizes: {
+        default: "1.5x",
+        "is-small": "1x",
+        "is-medium": "2x",
+        "is-large": "3x"
+      },
+      iconPrefix: "",
+      internalIcons: {
+        check: "checkmark",
+        information: "info",
+        "check-circle": "checkmark-circle",
+        alert: "alert-triangle",
+        "alert-circle": "alert-circle",
+        "arrow-up": "arrow-up",
+        "chevron-right": "chevron-right",
+        "chevron-left": "chevron-left",
+        "chevron-down": "chevron-down",
+        eye: "eye",
+        "eye-off": "eye-off",
+        "menu-down": "arrow-down",
+        "menu-up": "arrow-up"
+      }
+    }
+  }
+});
 
 Vue.use(VueNativeSock, 'ws://jamestev.myddns.me:802', {reconnection: true, connectManually:true})
 

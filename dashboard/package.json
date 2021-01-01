@@ -19,6 +19,7 @@
     "sass-loader": "^8.0.0",
     "vue": "^2.6.11",
     "vue-cookies": "^1.6.1",
+    "vue-feather-icons": "^5.1.0",
     "vue-native-websocket": "^2.0.13",
     "vue-plotly": "^1.1.0",
     "vue-router": "^3.1.3",
