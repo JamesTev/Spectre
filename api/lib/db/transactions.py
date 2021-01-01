@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 def connect_db(user=None, pw=None):
-    me.connect('spectre_db', host=os.getenv("DB_URI"))
+    me.connect(db='spectre_db', host=os.getenv("DB_URI"))
 
 def save_reading_set(req_data):
     """
@@ -19,21 +19,24 @@ def save_reading_set(req_data):
     if not all([k in req_data for k in exp_keys]):
         return 400, "Missing keys in request data"
 
-    set_id = time.time()
+    set_ref = str(int(time.time()))
     readings = []
     for r in req_data["readings"]:
-        readings.append(Reading(set_id=set_id, timestamp=r["timestamp"], values=r["values"]))
-
+        ts = datetime.fromtimestamp(r["timestamp"]/1000)
+        readings.append(Reading(set_ref=set_ref, timestamp=ts, values=r["values"]))
+    
     set_data = {
-        "id": set_id,
+        "ref": set_ref,
+        "timestamp": datetime.fromtimestamp(time.time()),
         "device_id": req_data["device_id"],
         "readings": readings,
         "sample_name": req_data["sample_name"],
         "sample_descr": req_data["sample_descr"],
         "params": req_data["params"]
     }
-
+    
     ReadingSet(**set_data).save()
+    return {"error": False, "message": "save successful"}
     
 def get_reading_sets(id=None, start_ts=None, end_ts=None):
     if id is not None:
@@ -49,7 +52,7 @@ def get_reading_sets(id=None, start_ts=None, end_ts=None):
         return {}
     
     return json.dumps(result)
-
+        
 def process_objects(queryset):
     out = []    
     q = queryset.as_pymongo()
@@ -60,5 +63,8 @@ def process_objects(queryset):
                 if isinstance(v, datetime):
                     v = v.isoformat()
                 tmp[k] = v
+            if k == 'readings':
+                for reading in v:
+                    reading['timestamp'] = reading['timestamp'].isoformat()
         out.append(tmp)
     return out
