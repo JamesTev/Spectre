@@ -6,8 +6,13 @@
 #include <WebSocketsServer.h>
 #include "config.h"
 
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 #define led 32
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // Constants
 const char* ssid = "Teversham 2.4GHz";
@@ -27,6 +32,8 @@ WebSocketsServer webSocket = WebSocketsServer(802);
 byte readings[NPIXELS]; // Field for measured values <0-255>
 int sampleTime;
 int exposureTime;
+
+bool clientConn = false;
 
 void setup(void)
 {
@@ -61,19 +68,12 @@ void setup(void)
 
 void loop (void)
 {
-
-  exposureTime = analogRead(exposurePot)*3;
-  sampleSensor(readings, exposureTime);
-  
-  Serial.write ((byte)0);            // sync byte = 0
-  String hexString = "";
-  for (int i = 0; i < NPIXELS; i++) {
-    //       Serial.write ((byte)Pixel[i]+1);
-    printHex(readings[i]);
-    char hexCar[2];
+  if(clientConn){
+      exposureTime = analogRead(exposurePot)*3;
+      sampleSensor(readings, exposureTime);
+      webSocket.broadcastBIN(readings, NPIXELS);
   }
-  Serial.println('\n');
-  webSocket.broadcastBIN(readings, NPIXELS);
+
   webSocket.loop();
   delay(400); // just for debug to slow down serial output
 }
@@ -99,14 +99,22 @@ void onWebSocketEvent(uint8_t num,
         Serial.printf("[%u] Connection from ", num);
         Serial.println(ip.toString());
 
-        display.setCursor(0, 0);
-        display.print("Connected: ");
+        clientConn = true;
+        
+        display.setCursor(0, 20);
+        display.print("client connected: ");
+        display.setCursor(0, 30);
         display.print(ip.toString());
+        display.display();
 
-//        char * s;
-//        sprintf(s, "{'exposure':%d}", exposureTime);
-//
-//        webSocket.sendTXT(num, s);
+        String params = "__params__{";
+        params+="\"exposure\":";
+        params+=exposureTime;
+        params+= ", \"dummyVar\":";
+        params+=100;
+        params+="}";
+
+        webSocket.sendTXT(num, params);
       }
       break;
 
@@ -174,23 +182,18 @@ void sampleSensor(byte readingsBuffer[], int exposure) {
     delayMicroseconds(20);
 }
 
-void initOLED() {
-
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
-  // Show image buffer on the display hardware.
-  // Since the buffer is intialized with an Adafruit splashscreen
-  // internally, this will display the splashscreen.
-  display.display();
-  delay(800);
-
-  // Clear the buffer.
-  display.clearDisplay();
-  display.display();
-
-  // text display tests
-  display.setTextSize(0.75);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.print("Team Spectre\n");
+void initOLED(){
+   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+      Serial.println(F("SSD1306 allocation failed"));
+    }
+    delay(500);
+    display.clearDisplay();
+  
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    // Display static text
+    display.println("Team Spectre");
+    display.display();
+    //display.startscrollright(0x00, 0x0F); 
 }
