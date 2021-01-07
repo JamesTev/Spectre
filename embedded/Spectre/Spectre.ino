@@ -68,10 +68,19 @@ void setup(void)
 
 void loop (void)
 {
-  if(clientConn){
+  if(clientConn or true){ // ignore this statement for now
       exposureTime = analogRead(exposurePot)*3;
       sampleSensor(readings, exposureTime);
       webSocket.broadcastBIN(readings, NPIXELS);
+
+      Serial.write ((byte)0);            // sync byte = 0
+      String hexString = "";
+      for (int i = 0; i < NPIXELS; i++) {
+        //       Serial.write ((byte)Pixel[i]+1);
+          printHex(readings[i]);
+          char hexCar[2];
+      }
+      Serial.println("");
   }
 
   webSocket.loop();
