@@ -1,0 +1,64 @@
+{
+  "name": "spectre-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps",
+    "rebuild": "electron-rebuild -f -w serialport"
+  },
+  "main": "background.js",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "buefy": "^0.8.20",
+    "bulma": "^0.8.2",
+    "core-js": "^3.8.2",
+    "electron": "^9.0.0",
+    "sass-loader": "^8.0.0",
+    "serialport": "^9.0.4",
+    "vue": "^2.6.12",
+    "vue-cookies": "^1.7.4",
+    "vue-feather-icons": "^5.1.0",
+    "vue-native-websocket": "^2.0.14",
+    "vue-plotly": "^1.1.0",
+    "vue-router": "^3.4.9",
+    "vuex": "^3.6.0"
+  },
+  "devDependencies": {
+    "@babel/helper-compilation-targets": "^7.12.5",
+    "@vue/cli-plugin-babel": "^4.5.10",
+    "@vue/cli-plugin-eslint": "^4.5.10",
+    "@vue/cli-service": "^4.5.10",
+    "babel-eslint": "^10.1.0",
+    "electron": "^9.0.0",
+    "electron-devtools-installer": "^3.1.0",
+    "electron-rebuild": "^2.3.4",
+    "eslint": "^5.16.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "vue-cli-plugin-electron-builder": "^2.0.0-rc.5",
+    "vue-template-compiler": "^2.6.12"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ]
+}

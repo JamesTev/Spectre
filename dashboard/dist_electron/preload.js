@@ -1,0 +1,1 @@
+window.serialport = require("serialport");

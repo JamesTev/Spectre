@@ -99,6 +99,9 @@
                     </div>
                   </div>
                 </div>
+
+                <serial-handler></serial-handler>
+
               </b-tab-item>
 
               <b-tab-item label="Live view" :disabled="!requiredInfoCaptured">
@@ -227,10 +230,13 @@ import { Plotly } from "vue-plotly";
 import { QueryService } from "@/services/query.service";
 import config from "@/config/config.json";
 
+import SerialHandler from '@/components/SerialHandler.vue';
+
 export default {
   name: "home",
   components: {
     Plotly,
+    SerialHandler
   },
   data() {
     return {
@@ -252,7 +258,7 @@ export default {
     };
   },
   beforeMount() {
-    this.$connect(); //connect ws
+    // this.$connect(); //connect ws
     this.$options.sockets.onmessage = (msg) => {
       this.handleMsg(msg.data);
     };

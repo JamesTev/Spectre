@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../components/Home.vue';
-import Dashboard from '../components/Dashboard.vue';
 
 import {TokenService} from '../services/storage.service'
 import { ToastProgrammatic as toast } from 'buefy'
@@ -14,14 +13,14 @@ const routes = [
     name: 'home',
     component: Home,
   },
-  {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: Dashboard,
-    meta:{
-      requiresAuth: true
-    }
-  },
+  // {
+  //   path: '/dashboard',
+  //   name: 'dashboard',
+  //   component: Dashboard,
+  //   meta:{
+  //     requiresAuth: true
+  //   }
+  // },
 ];
 
 const router = new VueRouter({

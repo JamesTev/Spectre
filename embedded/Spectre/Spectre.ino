@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <Wire.h>
+#include <ESPmDNS.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <WiFi.h>
@@ -17,6 +18,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 // Constants
 const char* ssid = "Teversham 2.4GHz";
 const char* password = "083655655000";
+
+const char* mdnsName = "spectreEsp32"; // Domain name for the mDNS responder
 
 // Globals
 WebSocketsServer webSocket = WebSocketsServer(802);
@@ -60,6 +63,7 @@ void setup(void)
   Serial.print("My IP address: ");
   Serial.println(WiFi.localIP());
 
+  startMDNS();                 // Start the mDNS responder
 
   // Start WebSocket server and assign callback
   webSocket.begin();
@@ -189,6 +193,13 @@ void sampleSensor(byte readingsBuffer[], int exposure) {
        }
  
     delayMicroseconds(20);
+}
+
+void startMDNS() { // Start the mDNS responder
+  MDNS.begin(mdnsName);                        // start the multicast domain name server
+  Serial.print("mDNS responder started: http://");
+  Serial.print(mdnsName);
+  Serial.println(".local");
 }
 
 void initOLED(){

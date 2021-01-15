@@ -48,7 +48,7 @@ Vue.use(Buefy, {
   }
 });
 
-Vue.use(VueNativeSock, 'ws://jamestev.myddns.me:802', {reconnection: true, connectManually:true})
+Vue.use(VueNativeSock, 'ws://spectreEsp32.local:802', {reconnection: true, connectManually:false})
 
 Vue.use(require('vue-cookies'))
 Vue.$cookies.config('1d')
