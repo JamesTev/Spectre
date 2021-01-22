@@ -1,4 +1,5 @@
 dashboard/node_modules/
+dashboard/dist*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

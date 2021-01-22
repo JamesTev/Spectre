@@ -126,10 +126,10 @@
                       <b-field
                         label="readings per set"
                         label-position="on-border"
-                        v-model="readingSetLen"
                       >
                         <b-input
                           :value="readingSetLen"
+                          v-model="readingSetLen"
                           type="number"
                           :min="1"
                           :max="10"
@@ -140,11 +140,11 @@
                       <b-field
                         label="reading period (sec)"
                         label-position="on-border"
-                        v-model="readingPeriodSec"
                       >
                         <b-input
                           type="number"
                           :value="readingPeriodSec"
+                          v-model="readingPeriodSec"
                           :min="0.1"
                           :max="4.0"
                           :step="0.1"
@@ -364,7 +364,6 @@ export default {
         await sleep(this.readingPeriodSec * 1000);
         this.recProgress = ((i + 1) * 100) / this.readingSetLen;
       }
-      console.log(JSON.stringify(this.readingSet));
       this.isRecording = false;
       this.viewTab = 2;
     },
