@@ -269,6 +269,7 @@ export default {
     this.readingSetLen = this.config.samplingDefaults.readingsPerSet;
     this.readingPeriodSec = this.config.samplingDefaults.readingPeriodSec;
     this.devices = this.config.devices;
+    this.deviceParams = this.config.deviceParamDefaults
   },
   computed: {
     dataLoading() {
