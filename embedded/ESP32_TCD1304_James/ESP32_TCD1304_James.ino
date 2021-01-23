@@ -107,7 +107,7 @@ void driving_signal_init() {
   digitalWrite(CLK_PIN,HIGH);
   digitalWrite(SH_PIN,LOW);
   
-  signal_timer = timerBegin(1, 80, true); // 80 MHz / 8000 = 10 kHz hardware (minimum integration time 100µs)
+  signal_timer = timerBegin(1, 40, true); // ** testing with 40 instead of 80 // 80 MHz / 8000 = 10 kHz hardware (minimum integration time 100µs)
   timerAttachInterrupt(signal_timer, &onTimer, false); // Attaches the handler function to the timer 
   timerAlarmWrite(signal_timer, timebase, true); // Interrupts when counter == 45, i.e. 22.222 times a second
   timerAlarmEnable(signal_timer);
@@ -168,7 +168,7 @@ void setup() {
 }
 
 void loop() {
-  delay(900);
+  delay(500);
   for(int j = 0; j < 500;j++) // serial plotter can only display 500 pixels at a time
   {
     Serial.println(dataBuff[j]);
