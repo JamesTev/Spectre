@@ -29,13 +29,17 @@ volatile uint32_t ICG_ticks_L=50*SH_ticks_H; // equals sampling period (in 'tick
 volatile uint32_t ICG_ticks_H=2*SH_ticks_L; // equals integration clear duration (in 'ticks', uncritical and typically 2*SH_ticks_L)
 volatile bool ICG_is_high=true;
 
-volatile uint8_t dataBuff[N_SAMPLES];
+uint8_t readBuff[N_SAMPLES];
+uint8_t dataBuff[N_SAMPLES];
 
 hw_timer_t * signal_timer = NULL; // our timer
 portMUX_TYPE DRAM_ATTR timerMux = portMUX_INITIALIZER_UNLOCKED; 
 
 ledc_timer_config_t clock_timer;
 ledc_channel_config_t clock_pwm_config;
+
+char cmdBuffer[16];
+char cmdIndex = 0;
 
 void IRAM_ATTR onTimer() {
 //Serial.println("tick");
@@ -107,7 +111,7 @@ void driving_signal_init() {
   digitalWrite(CLK_PIN,HIGH);
   digitalWrite(SH_PIN,LOW);
   
-  signal_timer = timerBegin(1, 40, true); // ** testing with 40 instead of 80 // 80 MHz / 8000 = 10 kHz hardware (minimum integration time 100µs)
+  signal_timer = timerBegin(1, 80, true); // 80 MHz / 8000 = 10 kHz hardware (minimum integration time 100µs)
   timerAttachInterrupt(signal_timer, &onTimer, false); // Attaches the handler function to the timer 
   timerAlarmWrite(signal_timer, timebase, true); // Interrupts when counter == 45, i.e. 22.222 times a second
   timerAlarmEnable(signal_timer);
@@ -133,18 +137,20 @@ void reader(void *pvParameter) {
           read_sum += offset - buffer[0];
           read_sum += offset - buffer[1];
           if (i < N_SAMPLES){
-            dataBuff[i++] = ((offset - buffer[0]) >> 4); // convert to 8 bit
+            readBuff[i++] = ((offset - buffer[0]) >> 4); // convert to 8 bit
+            readBuff[i++] = ((offset - buffer[1]) >> 4); // convert to 8 bit
+            read_counter+=2;
           }
-          read_counter++;
         } else {
           Serial.println("buffer empty");
         }
-        if (read_counter == N_SAMPLES) {
+        if (read_counter >= N_SAMPLES) {
           adc_reading = read_sum / N_SAMPLES / 2;
           read_counter = 0;
           i = 0;
           read_sum = 0;
           sampleFlag = 0;
+          copy(readBuff, dataBuff, N_SAMPLES); // copy to data buffer for reading
         }
       }else{
         yield();
@@ -168,9 +174,42 @@ void setup() {
 }
 
 void loop() {
-  delay(500);
-  for(int j = 0; j < 500;j++) // serial plotter can only display 500 pixels at a time
+  int x;
+
+  if (Serial.available())
+  {
+    cmdBuffer[cmdIndex++] = Serial.read();
+  }
+  if (cmdBuffer[0] == 'r')
+  {
+    serialdump();
+  }
+  if (cmdBuffer[0] == 'R')
+  {
+    pyserialdump();
+  }
+  cmdBuffer[0] = '\0';
+  cmdIndex = 0;
+}
+
+// Function to copy 'len' elements from 'src' to 'dst'
+void copy(uint8_t* src, uint8_t* dst, int len) {
+    memset(dst, 0, len);
+    memcpy(dst, src, sizeof(src[0])*len);
+}
+
+void serialdump(){
+  for(int j = 0; j < 1000; j+=2) // serial plotter can only display 500 pixels at a time
   {
     Serial.println(dataBuff[j]);
   }
+}
+
+void pyserialdump(){
+  Serial.print("#"); // to sync
+  for(int j = 0; j < N_SAMPLES; j++)
+  {
+    Serial.println(dataBuff[j], HEX);
+  }
+  Serial.print("$");
 }
