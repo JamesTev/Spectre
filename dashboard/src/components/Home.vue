@@ -55,7 +55,6 @@
 
                       <div class="columns" style="margin-top: 15px">
                         <div class="column is-8">
-
                           <b-field label="API (active ingredient)" label-position="on-border">
                             <b-autocomplete v-model="apiType" :data="filteredAPIs" placeholder="e.g. paracetamol" clearable @select="option => (apiType = option)">
                               <template #empty>No matches - add your own?</template>
@@ -71,7 +70,6 @@
 
                       <div class="columns" style="margin-top: 15px">
                         <div class="column is-8">
-                 
                           <b-field label="adulterant" label-position="on-border">
                             <b-autocomplete v-model="adulterantType" :data="filteredAdulterants" placeholder="e.g. white sugar" clearable @select="option => (adulterantType = option)">
                               <template #empty>No matches - add your own?</template>
@@ -87,7 +85,6 @@
 
                       <div class="columns" style="margin-top: 15px">
                         <div class="column is-8">
-
                           <b-field label="solvent" label-position="on-border">
                             <b-autocomplete v-model="solvent" :data="filteredSolvents" placeholder="e.g. distilled water" clearable @select="option => (solvent = option)">
                               <template #empty>No matches - add your own?</template>
@@ -127,14 +124,20 @@
               <b-tab-item label="Live view" :disabled="!requiredInfoCaptured">
                 <div>
                   <div>
-                    <p class="title is-4">Live Spectrum</p>
-                    <p v-if="dataLoading" class="subtitle has-text-info is-6">
-                      Awaiting data...
-                    </p>
-                    <p v-else class="subtitle is-6">
-                      Showing spectrum for sample:
-                      <b-tag>{{ sampleName }}</b-tag>
-                    </p>
+                    <div class="columns">
+                      <div class="column is-8">
+                        <p class="title is-4">Live Spectrum</p>
+                        <p v-if="dataLoading" class="subtitle has-text-info is-6">
+                          Awaiting data...
+                        </p>
+                        <p v-else class="subtitle is-6">
+                          Showing spectrum for sample:
+                          <b-tag>{{ sampleName }}</b-tag>
+                        </p>
+                      </div>
+                      
+                    </div>
+
                     <Plotly :data="chartData.data" :layout="chartData.layout" style="margin-top: 0px; padding: 0px"></Plotly>
                   </div>
                   <div class="columns" style="padding-top: 30px">
@@ -148,7 +151,15 @@
                         <b-input type="number" :value="readingPeriodSec" v-model="readingPeriodSec" :min="0.1" :max="4.0" :step="0.1"></b-input>
                       </b-field>
                     </div>
+                    <div class="column">
+                        <p class="title is-6" style="margin-top:10px">last calibration: 
+                          <b-tag v-if="lastCal" class="is-info">{{lastCal.toLocaleString()}}</b-tag>
+                          <b-tag v-else class="is-danger">never</b-tag>
+                        </p>
+                      </div>
+
                     <div class="column has-text-right buttons">
+                      <b-button class="button is-primary has-text-right" :disabled="dataLoading" :loading="isRecordingCal" @click="recordReadingSet(true)">Record calibration set</b-button>
                       <b-button class="button is-primary has-text-right" :disabled="dataLoading" :loading="isRecording" @click="recordReadingSet">Record set </b-button>
                     </div>
                   </div>
@@ -156,7 +167,7 @@
                   <b-progress size="is-medium" v-if="isRecording" type="is-primary" :value="recProgress" show-value></b-progress>
                 </div>
               </b-tab-item>
-              <b-tab-item label="Sample view" :disabled="readingSet.length == 0">
+              <b-tab-item label="Sample view" :disabled="readingSet.length == 0 || isRecording || isRecordingCal">
                 <div v-if="readingSet && readingSet.length > 0">
                   <div class="columns">
                     <div class="column is-5">
@@ -215,22 +226,24 @@ export default {
       apiMass: 0,
       solventVol: 0,
       solvent: "",
-      sampleName: "test sample",
+      sampleName: "",
       sampleDescr: "",
       devices: [],
-      viewTab: 0,
+      viewTab: 1,
+      lastCal: null,
       deviceParams: null,
       selectedDevice: null,
       readingSetLen: 5,
       readingSetSaved: false,
       readingPeriodSec: 0.5,
       isRecording: false,
+      isRecordingCal: false,
       validConcentration: false, // whether or not concentration value matches API/adult. ratio
       recProgress: 0.0,
       apiLoading: false,
-      apis: ['paracetamol', 'ibuprofen', 'viagra', 'oxalic acid', 'L-glutamine'],
-      adulterants: ['white sugar', 'table salt', 'maltodextrin', 'castor sugar'],
-      solvents: ['distilled water (room temp)', 'distilled water (boiling)', 'acetone', 'saline', 'alcohol 70%', 'alcohol 75%', 'alcohol 80%'],
+      apis: ["paracetamol", "ibuprofen", "viagra", "oxalic acid", "L-glutamine"],
+      adulterants: ["white sugar", "table salt", "maltodextrin", "castor sugar"],
+      solvents: ["distilled water (room temp)", "distilled water (boiling)", "acetone", "saline", "alcohol 70%", "alcohol 75%", "alcohol 80%"],
       calibrationSet: []
     };
   },
@@ -254,17 +267,17 @@ export default {
     },
     requiredInfoCaptured() {
       let check1 = this.selectedDevice && this.sampleName.length > 0;
-      let check2 = this.adulterantType.length * this.apiType.length * this.solvent.length > 0
-      return check1 && check2
+      let check2 = this.adulterantType.length * this.apiType.length * this.solvent.length > 0;
+      return check1 && check2;
     },
-    filteredSolvents(){
-      return this.filterOptions(this.solvents, this.solvent)
+    filteredSolvents() {
+      return this.filterOptions(this.solvents, this.solvent);
     },
-    filteredAdulterants(){
-      return this.filterOptions(this.adulterants, this.adulterantType)
+    filteredAdulterants() {
+      return this.filterOptions(this.adulterants, this.adulterantType);
     },
-    filteredAPIs(){
-      return this.filterOptions(this.apis, this.apiType)
+    filteredAPIs() {
+      return this.filterOptions(this.apis, this.apiType);
     },
     chartData(data, title = "") {
       var x = [];
@@ -329,30 +342,50 @@ export default {
   },
   methods: {
     ...mapActions("auth", ["login"]),
-    filterOptions(source, query){
-      return source.filter((option) => {
-          return option
-              .toString()
-              .toLowerCase()
-              .indexOf(query.toLowerCase()) >= 0
-      })
+    filterOptions(source, query) {
+      return source.filter(option => {
+        return (
+          option
+            .toString()
+            .toLowerCase()
+            .indexOf(query.toLowerCase()) >= 0
+        );
+      });
     },
-    async recordReadingSet() {
+    async recordReadingSet(calibration = false) {
       this.recProgress = 0;
-      this.isRecording = true;
       this.readingSetSaved = false;
       this.readingSet = [];
 
-      for (let i = 0; i < this.readingSetLen; i++) {
+      let nReadings = this.readingSetLen;
+      let readPeriod = this.readingPeriodSec;
+
+      if (calibration) {
+        nReadings = 3;
+        readPeriod = 1.0;
+        this.isRecordingCal = true;
+      } else {
+        this.isRecording = true;
+      }
+
+      for (let i = 0; i < nReadings; i++) {
         this.readingSet.push({
           timestamp: Date.now(),
           values: this.sensorData.map(yi => (yi * 100) / 255)
         });
-        await sleep(this.readingPeriodSec * 1000);
-        this.recProgress = ((i + 1) * 100) / this.readingSetLen;
+        await sleep(readPeriod * 1000);
+        this.recProgress = ((i + 1) * 100) / nReadings;
       }
       this.isRecording = false;
-      this.viewTab = 2;
+      if (!calibration) {
+        this.viewTab = 2;
+        this.isRecording = false;
+      } else {
+        this.calibrationSet = this.readingSet; // update calibration set
+        this.readingSet = []; // clear reading set
+        this.isRecordingCal = false;
+        this.lastCal = new Date(Date.now())
+      }
     },
     trigger() {
       this.$socket.send("operate gate");
@@ -409,18 +442,20 @@ export default {
       };
       return data;
     },
-    checkSampleNumbers(){
-      let valid = true
-      if(this.adulterantMass == 0){ // pure sample 
-        valid &= (this.concentration == 100)
-      }else if(this.apiMass == 0){ // completely adulterated
-        valid &= (this.concentration == 0)
+    checkSampleNumbers() {
+      let valid = true;
+      if (this.adulterantMass == 0) {
+        // pure sample
+        valid &= this.concentration == 100;
+      } else if (this.apiMass == 0) {
+        // completely adulterated
+        valid &= this.concentration == 0;
+      } else if (Math.abs((this.apiMass * 100) / this.adulterantMass - this.concentration) > 5) {
+        // more than 5% deviation
+        console.log("Excess deviation detected");
+        valid = false;
       }
-      else if(Math.abs((this.apiMass*100)/this.adulterantMass-this.concentration) > 5){ // more than 5% deviation
-        console.log("Excess deviation detected")
-        valid = false
-      }
-      return valid
+      return valid;
     },
     handleMsg(data) {
       if (data instanceof Blob) {
