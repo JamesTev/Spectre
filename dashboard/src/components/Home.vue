@@ -7,7 +7,7 @@
             <!-- <img src="/assets/invictus-logo.svg" width="256px"> -->
 
             <div class="columns" style="padding-top: 50px">
-              <div class="column is-2">
+              <div class="column is-6">
                 <h1 class="title is-2" style="margin-bottom: 5px">Spectre</h1>
                 <h1 class="heading">Spectrum Analyser</h1>
               </div>
@@ -23,7 +23,7 @@
               <b-tab-item label="Setup">
                 <div id="infoCapture" class="is-left" style="padding: 0px 0px 20px 0px">
                   <div class="columns" style="padding-top: 30px">
-                    <div class="column is-6">
+                    <div class="column is-8">
                       <p class="title is-5">Sample information</p>
                       <p class="subtitle is-6" style="margin-bottom: 20px">
                         Information pertaining to the sample and the owner of the spectrometer
@@ -156,7 +156,7 @@
                   <b-progress size="is-medium" v-if="isRecording" type="is-primary" :value="recProgress" show-value></b-progress>
                 </div>
               </b-tab-item>
-              <b-tab-item label="Sample view" :disabled="readingSet.length == 0 && false">
+              <b-tab-item label="Sample view" :disabled="readingSet.length == 0">
                 <div v-if="readingSet && readingSet.length > 0">
                   <div class="columns">
                     <div class="column is-5">
@@ -250,7 +250,7 @@ export default {
   },
   computed: {
     dataLoading() {
-      return !this.sensorData || this.sensorData.length == 0;
+      return this.sensorData || this.sensorData.length == 0;
     },
     requiredInfoCaptured() {
       let check1 = this.selectedDevice && this.sampleName.length > 0;
@@ -342,6 +342,7 @@ export default {
       this.isRecording = true;
       this.readingSetSaved = false;
       this.readingSet = [];
+
       for (let i = 0; i < this.readingSetLen; i++) {
         this.readingSet.push({
           timestamp: Date.now(),
@@ -398,9 +399,9 @@ export default {
         sample_name: this.sampleName,
         sample_descr: this.sampleDescr,
         api_type: this.apiType,
-        api_mass: this.api_mass,
+        api_mass: this.apiMass,
         adulterant_type: this.adulterantType,
-        adulterant_mass: this.adulterant_mass,
+        adulterant_mass: this.adulterantMass,
         solvent: this.solvent,
         solvent_vol: this.solventVol,
         concentration: this.concentration,
