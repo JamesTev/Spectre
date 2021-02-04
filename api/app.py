@@ -38,4 +38,4 @@ def get_file():
 
 if __name__ == '__main__':
     connect_db()
-    app.run()
+    app.run(debug=True)

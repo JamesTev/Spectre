@@ -15,7 +15,8 @@ def save_reading_set(req_data):
     """
     Creates and saves a reading set from raw data. `data` should be a 2D list containing 1 or more readings.
     """
-    exp_keys = ["timestamp", "readings", "device_id", "sample_name", "sample_descr", "params"]
+    from .models import ReadingSet
+    exp_keys = [k for k in dict(ReadingSet.__dict__).keys() if not k.startswith('_')]
     if not all([k in req_data for k in exp_keys]):
         return 400, "Missing keys in request data"
 
@@ -28,14 +29,17 @@ def save_reading_set(req_data):
     set_data = {
         "ref": set_ref,
         "timestamp": datetime.fromtimestamp(time.time()),
-        "device_id": req_data["device_id"],
         "readings": readings,
-        "sample_name": req_data["sample_name"],
-        "sample_descr": req_data["sample_descr"],
-        "params": req_data["params"]
     }
+    set_data.update(req_data)
+    for k in set_data.keys():
+        if k not in exp_keys:
+            del set_data[k] # remove any redundant keys from req data
+    try:
+        ReadingSet(**set_data).save()
+    except Exception as e:
+        return {"error": True, "message": "save successful"}
     
-    ReadingSet(**set_data).save()
     return {"error": False, "message": "save successful"}
     
 def get_reading_sets(id=None, start_ts=None, end_ts=None):

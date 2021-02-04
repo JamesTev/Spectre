@@ -21,8 +21,15 @@ class ReadingSet(me.Document):
     ref = me.StringField(max_length=20, required=True, unique=True)
     timestamp = me.DateTimeField(required=True)
     readings = me.ListField(me.EmbeddedDocumentField(Reading))
+    calibration_readings = me.ListField(me.EmbeddedDocumentField(Reading))
     sample_name = me.StringField(max_length=80, required=True)
-    sample_descr = me.StringField(max_length=200, required=False)
+    sample_descr = me.StringField(max_length=200, required=True)
+    adulterant_type = me.StringField(max_length=200, required=True)
+    api_type = me.StringField(max_length=200, required=False)
+    solvent = me.StringField(max_length=200, required=False)
+    adulterant_mass = me.DecimalField(min_value=0, precision=1, required=True)
+    api_mass = me.DecimalField(min_value=0, precision=1, required=True)
+    solvent_vol = me.DecimalField(min_value=0, precision=1, required=True)
     device_id = me.StringField(max_length=50, required=True)
     params = me.DictField(required=True) # pertinent device params
     
