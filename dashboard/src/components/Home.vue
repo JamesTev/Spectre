@@ -156,7 +156,7 @@
                   <b-progress size="is-medium" v-if="isRecording" type="is-primary" :value="recProgress" show-value></b-progress>
                 </div>
               </b-tab-item>
-              <b-tab-item label="Sample view" :disabled="readingSet.length == 0">
+              <b-tab-item label="Sample view" :disabled="readingSet.length == 0 && false">
                 <div v-if="readingSet && readingSet.length > 0">
                   <div class="columns">
                     <div class="column is-5">
@@ -231,6 +231,7 @@ export default {
       apis: ['paracetamol', 'ibuprofen', 'viagra', 'oxalic acid', 'L-glutamine'],
       adulterants: ['white sugar', 'table salt', 'maltodextrin', 'castor sugar'],
       solvents: ['distilled water (room temp)', 'distilled water (boiling)', 'acetone', 'saline', 'alcohol 70%', 'alcohol 75%', 'alcohol 80%'],
+      calibrationSet: []
     };
   },
   beforeMount() {
@@ -393,8 +394,16 @@ export default {
         device_id: this.selectedDevice.id,
         timestamp: Date.now(),
         readings: this.readingSet,
+        calibration_readings: this.calibrationSet,
         sample_name: this.sampleName,
         sample_descr: this.sampleDescr,
+        api_type: this.apiType,
+        api_mass: this.api_mass,
+        adulterant_type: this.adulterantType,
+        adulterant_mass: this.adulterant_mass,
+        solvent: this.solvent,
+        solvent_vol: this.solventVol,
+        concentration: this.concentration,
         params: this.deviceParams ? this.deviceParams : {}
       };
       return data;
