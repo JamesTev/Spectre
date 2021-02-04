@@ -17,12 +17,14 @@ def api_save_reading_set():
     data = request.get_json(force=True)
     return save_reading_set(data)
 
-@app.route('/data/', methods=["GET"])
+@app.route('/data', methods=["GET"])
 def api_get_reading_sets():
     args = {
         "id": request.args.get("id"),
         "start_ts": request.args.get("start_ts"),
-        "end_ts": request.args.get("end_ts")
+        "end_ts": request.args.get("end_ts"),
+        "head": request.args.get("head"),
+        "tail": request.args.get("tail")
     }
     return get_reading_sets(**args)
 

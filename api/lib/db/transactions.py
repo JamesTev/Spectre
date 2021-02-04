@@ -16,9 +16,8 @@ def save_reading_set(req_data):
     Creates and saves a reading set from raw data. `data` should be a 2D list containing 1 or more readings.
     """
     from .models import ReadingSet
-    exp_keys = [k for k in dict(ReadingSet.__dict__).keys() if not k.startswith('_')]
-    if not all([k in req_data for k in exp_keys]):
-        return 400, "Missing keys in request data"
+    exp_keys = ['ref', 'timestamp', 'readings', 'calibration_readings', 'sample_name', 'sample_descr', 'adulterant_type',
+                 'api_type', 'solvent', 'adulterant_mass', 'api_mass', 'solvent_vol', 'device_id', 'params']
 
     set_ref = str(int(time.time()))
     readings = []
@@ -31,26 +30,33 @@ def save_reading_set(req_data):
         "timestamp": datetime.fromtimestamp(time.time()),
         "readings": readings,
     }
-    set_data.update(req_data)
-    for k in set_data.keys():
-        if k not in exp_keys:
-            del set_data[k] # remove any redundant keys from req data
+    for k in exp_keys:
+        if not k in set_data:
+            if not k in req_data:
+                print(k)
+                return "Missing keys in request", 400
+            set_data[k] = req_data[k]
     try:
         ReadingSet(**set_data).save()
     except Exception as e:
-        return {"error": True, "message": "save successful"}
+        return {"error": True, "message": str(e)}, 500
     
-    return {"error": False, "message": "save successful"}
+    return {"error": False, "message": "save successful"}, 200
     
-def get_reading_sets(id=None, start_ts=None, end_ts=None):
+def get_reading_sets(id=None, start_ts=None, end_ts=None, head=None, tail=None):
+    
     if id is not None:
         result = ReadingSet.objects(id=id)
 #     elif not any([start_ts, end_ts]):
 #         if start_ts is not None:
 #             result = ReadingSet.objects()
     else:
-        result = ReadingSet.objects()
-        
+        if head is not None:
+            result = ReadingSet.objects[:int(head)]
+        elif tail is not None:
+            result = ReadingSet.objects().order_by('-_id').limit(int(tail))
+        else:
+            result = ReadingSet.objects()
     result = process_objects(result)
     if len(result) == 0:
         return {}
