@@ -263,7 +263,7 @@ export default {
   },
   computed: {
     dataLoading() {
-      return this.sensorData || this.sensorData.length == 0;
+      return !this.sensorData || this.sensorData.length == 0;
     },
     requiredInfoCaptured() {
       let check1 = this.selectedDevice && this.sampleName.length > 0;
