@@ -160,7 +160,7 @@
 
                     <div class="column has-text-right buttons">
                       <b-button class="button is-primary has-text-right" :disabled="dataLoading" :loading="isRecordingCal" @click="recordReadingSet(true)">Record calibration set</b-button>
-                      <b-button class="button is-primary has-text-right" :disabled="dataLoading" :loading="isRecording" @click="recordReadingSet">Record set </b-button>
+                      <b-button class="button is-primary has-text-right" :disabled="dataLoading" :loading="isRecording" @click="recordReadingSet(false)">Record set </b-button>
                     </div>
                   </div>
 
@@ -229,7 +229,7 @@ export default {
       sampleName: "",
       sampleDescr: "",
       devices: [],
-      viewTab: 1,
+      viewTab: 0,
       lastCal: null,
       deviceParams: null,
       selectedDevice: null,
@@ -403,7 +403,8 @@ export default {
           this.successMessage("Reading set saved successfully");
         })
         .catch(res => {
-          this.errorMessage("Couldn't save reading set - failed to communicated with database.");
+          this.errorMessage("Couldn't save reading set - check console for details");
+          console.log(res)
         })
         .finally(() => (this.apiLoading = false));
     },
