@@ -352,7 +352,7 @@ export default {
         );
       });
     },
-    async recordReadingSet(calibration = false) {
+    async recordReadingSet(calibration) {
       this.recProgress = 0;
       this.readingSetSaved = false;
       this.readingSet = [];

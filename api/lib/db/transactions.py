@@ -21,14 +21,19 @@ def save_reading_set(req_data):
 
     set_ref = str(int(time.time()))
     readings = []
-    for r in req_data["readings"]:
-        ts = datetime.fromtimestamp(r["timestamp"]/1000)
-        readings.append(Reading(set_ref=set_ref, timestamp=ts, values=r["values"]))
+    
+    def proc_readings(reading_data):
+        readings = []
+        for r in reading_data:
+            ts = datetime.fromtimestamp(r["timestamp"]/1000)
+            readings.append(Reading(set_ref=set_ref, timestamp=ts, values=r["values"]))
+        return readings
     
     set_data = {
         "ref": set_ref,
         "timestamp": datetime.fromtimestamp(time.time()),
-        "readings": readings,
+        "readings": proc_readings(req_data["readings"]),
+        "calibration_readings": proc_readings(req_data["calibration_readings"]),
     }
     for k in exp_keys:
         if not k in set_data:
@@ -73,7 +78,7 @@ def process_objects(queryset):
                 if isinstance(v, datetime):
                     v = v.isoformat()
                 tmp[k] = v
-            if k == 'readings':
+            if k == 'readings' or k == 'calibration_readings':
                 for reading in v:
                     reading['timestamp'] = reading['timestamp'].isoformat()
         out.append(tmp)
