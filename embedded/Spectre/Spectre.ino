@@ -186,7 +186,7 @@ void sampleSensor(byte readingsBuffer[], int exposure) {
        {
         delayMicroseconds(20);
         
-        readingsBuffer[j] = analogRead(analogOutPin)/4; // downsample to 8 bit
+        readingsBuffer[j] = min(analogRead(analogOutPin)/16, 255); // downsample to 8 bit
         
         digitalWrite(clockPin, HIGH);
         digitalWrite(clockPin, LOW);
