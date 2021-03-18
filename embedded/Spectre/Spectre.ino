@@ -73,7 +73,7 @@ void setup(void)
 void loop (void)
 {
   if(clientConn or true){ // ignore this statement for now
-      exposureTime = analogRead(exposurePot)*3;
+      exposureTime = analogRead(exposurePot)*5;
       sampleSensor(readings, exposureTime);
       webSocket.broadcastBIN(readings, NPIXELS);
 
