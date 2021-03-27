@@ -17,7 +17,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // Constants
 const char* ssid = "Teversham 2.4GHz";
-const char* password = "083655655000";
+const char* password = "<PASSWORD>";
 
 const char* mdnsName = "spectreEsp32"; // Domain name for the mDNS responder
 

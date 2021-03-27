@@ -1,3 +1,3 @@
-#define WIFI_SSID "Teversham 2.4GHz"
-#define WIFI_PW "083655655000"
+#define WIFI_SSID "mynicewifinetwork"
+#define WIFI_PW "asillypassword"
 #define WS_PORT 802
